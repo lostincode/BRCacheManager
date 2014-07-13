@@ -1,0 +1,17 @@
+PODS:
+  - BRCacheManager (0.1.0)
+  - Kiwi (2.3.0)
+
+DEPENDENCIES:
+  - BRCacheManager (from `../`)
+  - Kiwi
+
+EXTERNAL SOURCES:
+  BRCacheManager:
+    :path: ../
+
+SPEC CHECKSUMS:
+  BRCacheManager: 3026c76b51b13923a770bdb3bb3e1434546268c3
+  Kiwi: 54bece5b35564d9b8e03c608d926f1a22fcfc589
+
+COCOAPODS: 0.33.1
