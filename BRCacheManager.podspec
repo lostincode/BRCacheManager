@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "BRCacheManager"
-  s.version          = "0.0.2"
+  s.version          = "0.0.3"
   s.summary          = "A short description of BRCacheManager."
   s.description      = "A simple model disk based cache for iOS."
   s.homepage         = "https://github.com/lostincode/BRCacheManager"
