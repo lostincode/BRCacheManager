@@ -1,0 +1,9 @@
+target 'BRCacheManager', :exclusive => true do
+  pod "BRCacheManager", :path => "../"
+end
+
+target 'Tests', :exclusive => true do
+  pod "BRCacheManager", :path => "../"
+
+  pod 'Kiwi'
+end
