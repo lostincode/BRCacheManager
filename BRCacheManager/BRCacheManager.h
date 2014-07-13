@@ -12,6 +12,7 @@
 
 + (NSString *)getCachePath;
 + (id)getCachedContentForKey:(NSString *)cacheTitle;
++ (id)getCachedContentForKey:(NSString *)key withExpireTimeInSeconds:(NSUInteger)expireTime;
 + (void)saveCachedContent:(id)content forKey:(NSString *)key;
 
 @end

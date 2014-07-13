@@ -20,6 +20,11 @@
 
 + (id)getCachedContentForKey:(NSString *)key
 {
+    [self [getCachedContentForKey withExpireTimeInSeconds:3600];
+}
+
++ (id)getCachedContentForKey:(NSString *)key withExpireTimeInSeconds:(NSUInteger)expireTime
+{
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *cacheDirPath = [self getCachePath];
     
@@ -30,7 +35,7 @@
                                      error:nil];
     }
  
-    NSString *fileName = [NSString stringWithFormat:@"%@.plist", [BRCacheManager md5HexDigest:key]];
+    NSString *fileName = [NSString stringWithFormat:@"%@.plist", [self md5HexDigest:key]];
     NSString *filePath = [cacheDirPath stringByAppendingPathComponent:fileName];
     BOOL fileExists = [fileManager fileExistsAtPath:filePath];
     
@@ -42,7 +47,7 @@
     NSDate *modificationDate = attributes[NSFileModificationDate];
     
     NSDate *today = [NSDate date];
-    if ([today timeIntervalSinceDate:modificationDate] > 3600) {
+    if ([today timeIntervalSinceDate:modificationDate] > expireTime) {
         return nil;
     }
     
@@ -59,12 +64,12 @@
 {
     NSString *cacheDirPath = [self getCachePath];
     
-    NSString *fileName = [NSString stringWithFormat:@"%@.plist", [BRCacheManager md5HexDigest:key]];
+    NSString *fileName = [NSString stringWithFormat:@"%@.plist", [self md5HexDigest:key]];
     NSString *filePath = [cacheDirPath stringByAppendingPathComponent:fileName];
     [NSKeyedArchiver archiveRootObject:content toFile:filePath];
 }
 
-+ (NSString *)md5HexDigest:(NSString*)input
++ (NSString *)md5HexDigest:(NSString *)input
 {
     const char* str = [input UTF8String];
     unsigned char result[CC_MD5_DIGEST_LENGTH];
