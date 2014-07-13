@@ -15,7 +15,16 @@
 {
     NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
     NSString *cacheDirPath = [documentsPath stringByAppendingPathComponent:@"cache"];
+    
     return cacheDirPath;
+}
+
++ (NSString *)getCacheFilePathForKey:(NSString *)key
+{
+    NSString *fileName = [NSString stringWithFormat:@"%@.plist", [self md5HexDigest:key]];
+    NSString *filePath = [[self getCachePath] stringByAppendingPathComponent:fileName];
+    
+    return filePath;
 }
 
 + (id)getCachedContentForKey:(NSString *)key
@@ -26,17 +35,8 @@
 + (id)getCachedContentForKey:(NSString *)key withExpireTimeInSeconds:(NSUInteger)expireTime
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *cacheDirPath = [self getCachePath];
     
-    if (![fileManager fileExistsAtPath:cacheDirPath]) {
-        [fileManager createDirectoryAtPath:cacheDirPath
-               withIntermediateDirectories:NO
-                                attributes:nil
-                                     error:nil];
-    }
- 
-    NSString *fileName = [NSString stringWithFormat:@"%@.plist", [self md5HexDigest:key]];
-    NSString *filePath = [cacheDirPath stringByAppendingPathComponent:fileName];
+    NSString *filePath = [self getCacheFilePathForKey:key];
     BOOL fileExists = [fileManager fileExistsAtPath:filePath];
     
     if (!fileExists) {
@@ -52,7 +52,7 @@
     }
     
     id content = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
-
+    
     if (!content) {
         return nil;
     }
@@ -64,9 +64,25 @@
 {
     NSString *cacheDirPath = [self getCachePath];
     
-    NSString *fileName = [NSString stringWithFormat:@"%@.plist", [self md5HexDigest:key]];
-    NSString *filePath = [cacheDirPath stringByAppendingPathComponent:fileName];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    if (![fileManager fileExistsAtPath:cacheDirPath]) {
+        [fileManager createDirectoryAtPath:cacheDirPath
+               withIntermediateDirectories:NO
+                                attributes:nil
+                                     error:nil];
+    }
+    
+    NSString *filePath = [self getCacheFilePathForKey:key];
     [NSKeyedArchiver archiveRootObject:content toFile:filePath];
+}
+
++ (void)removeCachedContentForKey:(NSString *)key
+{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString *filePath = [self getCacheFilePathForKey:key];
+    
+    [fileManager removeItemAtPath:filePath error:nil];
 }
 
 + (NSString *)md5HexDigest:(NSString *)input
