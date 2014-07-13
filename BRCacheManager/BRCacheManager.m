@@ -20,7 +20,7 @@
 
 + (id)getCachedContentForKey:(NSString *)key
 {
-    [self getCachedContentForKey:key withExpireTimeInSeconds:3600];
+    return [self getCachedContentForKey:key withExpireTimeInSeconds:3600];
 }
 
 + (id)getCachedContentForKey:(NSString *)key withExpireTimeInSeconds:(NSUInteger)expireTime
