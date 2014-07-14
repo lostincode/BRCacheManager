@@ -14,7 +14,8 @@
 + (NSString *)getCachePath
 {
     NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
-    NSString *cacheDirPath = [documentsPath stringByAppendingPathComponent:@"cache"];
+    NSString *cacheFolder   = NSStringFromClass([self class]);
+    NSString *cacheDirPath  = [documentsPath stringByAppendingPathComponent:cacheFolder];
     
     return cacheDirPath;
 }
@@ -61,7 +62,7 @@
 }
 
 + (void)saveCachedContent:(id)content forKey:(NSString *)key
-{
+{ 
     NSString *cacheDirPath = [self getCachePath];
     
     NSFileManager *fileManager = [NSFileManager defaultManager];
