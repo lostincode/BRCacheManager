@@ -85,6 +85,11 @@
     [fileManager removeItemAtPath:filePath error:nil];
 }
 
+/**
+ * md5HexDigest
+ * Credit: http://stackoverflow.com/a/3104362
+ */
+
 + (NSString *)md5HexDigest:(NSString *)input
 {
     const char* str = [input UTF8String];
