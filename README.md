@@ -37,6 +37,7 @@ Example of workflow with AFNetworking.
  
          MyModel *myModel = [self customModelFromJson:responseObject];
          
+         //save your content to disk
          [BRCacheManager saveCachedContent:[myModel copy] forKey:path];
          
          return completionHandler(myModel, nil);
@@ -49,6 +50,8 @@ Example of workflow with AFNetworking.
 ```
 
 ## Requirements
+
+iOS 7 + ARC. If you're caching a custom model, it must implement NSCoding.
 
 ## Installation
 
