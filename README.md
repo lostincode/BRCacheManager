@@ -17,6 +17,7 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 Example of workflow with AFNetworking.
 
 ```objective-c
+#import <BRCacheManager.h>
 
 + (void)getMyContent
       completionHandler:(CustomBlock)completionHandler
