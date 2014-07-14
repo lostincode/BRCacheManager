@@ -23,7 +23,7 @@ Example of workflow with AFNetworking.
 {
     NSString *path = @"myendpoint";
     
-    //cache for 5 minutes
+    //check if we have content in the cache with a max age of 5 minutes
     id contents = [BRCacheManager getCachedContentForKey:path withExpireTimeInSeconds:(60 * 5)];
 
     if (contents) {
