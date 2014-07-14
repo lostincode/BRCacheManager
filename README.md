@@ -5,6 +5,8 @@
 [![License](https://img.shields.io/cocoapods/l/BRCacheManager.svg?style=flat)](http://cocoadocs.org/docsets/BRCacheManager)
 [![Platform](https://img.shields.io/cocoapods/p/BRCacheManager.svg?style=flat)](http://cocoadocs.org/docsets/BRCacheManager)
 
+A simple disk based cache for you models. Typically you might fetch some content via AFNetwroking, convert JSON to your custom model and display it. Speed up your app by using BRCacheManager to cache your content for x amount of seconds.
+
 ## Usage
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
