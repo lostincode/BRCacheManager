@@ -1,6 +1,6 @@
 # BRCacheManager
 
-[![CI Status](http://img.shields.io/travis/Bill/BRCacheManager.svg?style=flat)](https://travis-ci.org/Bill/BRCacheManager)
+[![Build Status](https://travis-ci.org/lostincode/BRCacheManager.svg?branch=master)](https://travis-ci.org/lostincode/BRCacheManager)
 [![Version](https://img.shields.io/cocoapods/v/BRCacheManager.svg?style=flat)](http://cocoadocs.org/docsets/BRCacheManager)
 [![License](https://img.shields.io/cocoapods/l/BRCacheManager.svg?style=flat)](http://cocoadocs.org/docsets/BRCacheManager)
 [![Platform](https://img.shields.io/cocoapods/p/BRCacheManager.svg?style=flat)](http://cocoadocs.org/docsets/BRCacheManager)
