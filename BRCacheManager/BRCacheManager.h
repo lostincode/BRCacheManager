@@ -16,5 +16,6 @@
 + (id)getCachedContentForKey:(NSString *)key withExpireTimeInSeconds:(NSUInteger)expireTime;
 + (void)saveCachedContent:(id)content forKey:(NSString *)key;
 + (void)removeCachedContentForKey:(NSString *)key;
++ (void)clearCaches;
 
 @end

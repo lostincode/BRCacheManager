@@ -106,4 +106,23 @@
     return ret;
 }
 
++ (void)clearCaches
+{
+    NSString *file;
+    NSString *path = [self getCachePath];
+    NSDirectoryEnumerator *enumerator = [[NSFileManager defaultManager] enumeratorAtPath:path];
+    
+    while (file = [enumerator nextObject]) {
+        
+        BOOL isDirectory = NO;
+        NSString *currentItemPath = [NSString stringWithFormat:@"%@/%@",path,file];
+        [[NSFileManager defaultManager] fileExistsAtPath: currentItemPath
+                                             isDirectory: &isDirectory];
+        if (!isDirectory) {
+            NSError *er = nil;
+            [[NSFileManager defaultManager] removeItemAtPath:currentItemPath error:&er];
+        }
+    }
+}
+
 @end
