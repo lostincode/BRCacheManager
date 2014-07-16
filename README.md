@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/cocoapods/l/BRCacheManager.svg?style=flat)](http://cocoadocs.org/docsets/BRCacheManager)
 [![Platform](https://img.shields.io/cocoapods/p/BRCacheManager.svg?style=flat)](http://cocoadocs.org/docsets/BRCacheManager)
 
-A simple, efficient, disk based cache for your models. Typically you might fetch some content via AFNetwroking, convert JSON to your custom model and display it. Speed up your app by using BRCacheManager to cache your content for x amount of seconds. Cached content expiration and clean up is manager for you out of the box.
+A simple, efficient, disk based cache for your models. Typically you might fetch some content via AFNetwroking, convert JSON to your custom model and display it. Speed up your app by using BRCacheManager to cache your content for x amount of seconds. Cached content expiration and clean up is managed for you out of the box.
 
 ## Usage
 
