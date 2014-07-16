@@ -9,12 +9,12 @@
 
 Pod::Spec.new do |s|
   s.name             = "BRCacheManager"
-  s.version          = "0.0.6"
+  s.version          = "0.0.7"
   s.summary          = "A simple model disk based cache for iOS."
   s.description      = "A simple library to cache your models to disk for x amount of seconds."
   s.homepage         = "https://github.com/lostincode/BRCacheManager"
   s.license          = 'MIT'
-  s.author           = { "Bill" => "roundedvision@gmail.com" }
+  s.author           = { "Bill Richards" => "roundedvision@gmail.com" }
   s.source           = { :git => "https://github.com/lostincode/BRCacheManager.git", :tag => s.version.to_s }
   s.social_media_url = 'https://twitter.com/lostincode'
 

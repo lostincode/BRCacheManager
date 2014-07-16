@@ -9,6 +9,9 @@
 #import "BRCacheManager.h"
 #import <CommonCrypto/CommonDigest.h>
 
+static const NSInteger kDefaultCacheAge = 60 * 60 * 1; // 1 hour
+static const NSInteger kDefaultExpiredCacheAge = 60 * 60 * 24 * 7; // 1 week
+
 @interface BRCacheManager()
 @property (strong, nonatomic) dispatch_queue_t fileQueue;
 @property (strong, nonatomic) NSFileManager *fileManager;
@@ -44,6 +47,27 @@
     dispatch_sync(self.fileQueue, ^{
         self.fileManager = [NSFileManager new];
     });
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(cleanUp)
+                                                 name:UIApplicationWillTerminateNotification
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(backgroundCleanUp)
+                                                 name:UIApplicationDidEnterBackgroundNotification
+                                               object:nil];
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:UIApplicationWillTerminateNotification
+                                                  object:nil];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:UIApplicationDidEnterBackgroundNotification
+                                                  object:nil];
 }
 
 - (NSString *)getCachePath
@@ -65,7 +89,7 @@
 
 - (id)getCachedContentForKey:(NSString *)key
 {
-    return [self getCachedContentForKey:key withExpireTimeInSeconds:3600];
+    return [self getCachedContentForKey:key withExpireTimeInSeconds:kDefaultCacheAge];
 }
 
 - (id)getCachedContentForKey:(NSString *)key withExpireTimeInSeconds:(NSUInteger)expireTime
@@ -155,6 +179,70 @@
     });
 }
 
+- (void)cleanUp
+{
+    [self cleanDiskWithCompletionBlock:nil];
+}
+
+- (void)backgroundCleanUp
+{
+    UIApplication *application = [UIApplication sharedApplication];
+    
+    __block UIBackgroundTaskIdentifier bgTask = [application beginBackgroundTaskWithExpirationHandler:^{
+        [application endBackgroundTask:bgTask];
+        bgTask = UIBackgroundTaskInvalid;
+    }];
+    
+    [self cleanDiskWithCompletionBlock:^{
+        [application endBackgroundTask:bgTask];
+        bgTask = UIBackgroundTaskInvalid;
+    }];
+}
+
+- (void)cleanDiskWithCompletionBlock:(void (^)())completionBlock
+{
+    __weak BRCacheManager *weakSelf = self;
+    
+    dispatch_async(self.fileQueue, ^{
+        
+        BRCacheManager *strongSelf = weakSelf;
+        
+        if (!strongSelf) {
+            return;
+        }
+        
+        [strongSelf cleanUpDisk];
+        
+    });
+}
+
+- (void)cleanUpDisk
+{
+    NSString *file;
+    NSDate *today = [NSDate date];
+    NSString *path = self.diskCachePath;
+    NSDirectoryEnumerator *enumerator = [self.fileManager enumeratorAtPath:path];
+    
+    while (file = [enumerator nextObject]) {
+        
+        BOOL isDirectory = NO;
+        NSString *currentItemPath = [NSString stringWithFormat:@"%@/%@",path,file];
+        
+        [self.fileManager fileExistsAtPath:currentItemPath
+                               isDirectory:&isDirectory];
+        if (isDirectory) {
+            continue;
+        }
+        
+        NSDictionary *attributes = [self.fileManager attributesOfItemAtPath:currentItemPath error:nil];
+        NSDate *modificationDate = attributes[NSFileModificationDate];
+        
+        if ([today timeIntervalSinceDate:modificationDate] > kDefaultExpiredCacheAge) {
+            [[NSFileManager defaultManager] removeItemAtPath:currentItemPath error:nil];
+        }
+    }
+}
+
 /**
  * md5HexDigest
  * Credit: http://stackoverflow.com/a/3104362
@@ -173,25 +261,6 @@
     }
     
     return ret;
-}
-
-- (void)clearCaches
-{
-    NSString *file;
-    NSString *path = [self getCachePath];
-    NSDirectoryEnumerator *enumerator = [[NSFileManager defaultManager] enumeratorAtPath:path];
-    
-    while (file = [enumerator nextObject]) {
-        
-        BOOL isDirectory = NO;
-        NSString *currentItemPath = [NSString stringWithFormat:@"%@/%@",path,file];
-        [[NSFileManager defaultManager] fileExistsAtPath: currentItemPath
-                                             isDirectory: &isDirectory];
-        if (!isDirectory) {
-            NSError *er = nil;
-            [[NSFileManager defaultManager] removeItemAtPath:currentItemPath error:&er];
-        }
-    }
 }
 
 @end
