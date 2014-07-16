@@ -10,12 +10,11 @@
 
 @interface BRCacheManager : NSObject
 
-+ (NSString *)getCachePath;
-+ (NSString *)getCacheFilePathForKey:(NSString *)key;
-+ (id)getCachedContentForKey:(NSString *)cacheTitle;
-+ (id)getCachedContentForKey:(NSString *)key withExpireTimeInSeconds:(NSUInteger)expireTime;
-+ (void)saveCachedContent:(id)content forKey:(NSString *)key;
-+ (void)removeCachedContentForKey:(NSString *)key;
-+ (void)clearCaches;
++ (BRCacheManager *)sharedManager;
+
+- (id)getCachedContentForKey:(NSString *)cacheTitle;
+- (id)getCachedContentForKey:(NSString *)key withExpireTimeInSeconds:(NSUInteger)expireTime;
+- (void)saveCachedContent:(id)content forKey:(NSString *)key;
+- (void)removeCachedContentForKey:(NSString *)key;
 
 @end

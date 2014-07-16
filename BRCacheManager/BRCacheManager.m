@@ -9,9 +9,44 @@
 #import "BRCacheManager.h"
 #import <CommonCrypto/CommonDigest.h>
 
+@interface BRCacheManager()
+@property (strong, nonatomic) dispatch_queue_t fileQueue;
+@property (strong, nonatomic) NSFileManager *fileManager;
+@property (copy, nonatomic) NSString *diskCachePath;
+@end
+
 @implementation BRCacheManager
 
-+ (NSString *)getCachePath
++ (BRCacheManager *)sharedManager
+{
+    static dispatch_once_t pred;
+    static BRCacheManager *shared;
+    dispatch_once(&pred, ^{
+        shared = [[BRCacheManager alloc] init];
+    });
+    return shared;
+}
+
+- (id)init
+{
+    self = [super init];
+    if(self){
+        [self setup];
+    }
+    return self;
+}
+
+- (void)setup
+{
+    self.fileQueue = dispatch_queue_create("com.wrichards.BRCacheManager", DISPATCH_QUEUE_SERIAL);
+    self.diskCachePath = [self getCachePath];
+    
+    dispatch_sync(self.fileQueue, ^{
+        self.fileManager = [NSFileManager new];
+    });
+}
+
+- (NSString *)getCachePath
 {
     NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
     NSString *cacheFolder   = NSStringFromClass([self class]);
@@ -20,70 +55,104 @@
     return cacheDirPath;
 }
 
-+ (NSString *)getCacheFilePathForKey:(NSString *)key
+- (NSString *)getCacheFilePathForKey:(NSString *)key
 {
     NSString *fileName = [NSString stringWithFormat:@"%@.plist", [self md5HexDigest:key]];
-    NSString *filePath = [[self getCachePath] stringByAppendingPathComponent:fileName];
+    NSString *filePath = [self.diskCachePath stringByAppendingPathComponent:fileName];
     
     return filePath;
 }
 
-+ (id)getCachedContentForKey:(NSString *)key
+- (id)getCachedContentForKey:(NSString *)key
 {
     return [self getCachedContentForKey:key withExpireTimeInSeconds:3600];
 }
 
-+ (id)getCachedContentForKey:(NSString *)key withExpireTimeInSeconds:(NSUInteger)expireTime
+- (id)getCachedContentForKey:(NSString *)key withExpireTimeInSeconds:(NSUInteger)expireTime
 {
-    NSFileManager *fileManager = [NSFileManager defaultManager];
+    __block id content = nil;
     
-    NSString *filePath = [self getCacheFilePathForKey:key];
-    BOOL fileExists = [fileManager fileExistsAtPath:filePath];
+    __weak BRCacheManager *weakSelf = self;
     
-    if (!fileExists) {
-        return nil;
-    }
-    
-    NSDictionary *attributes = [fileManager attributesOfItemAtPath:filePath error:nil];
-    NSDate *modificationDate = attributes[NSFileModificationDate];
-    
-    NSDate *today = [NSDate date];
-    if ([today timeIntervalSinceDate:modificationDate] > expireTime) {
-        return nil;
-    }
-    
-    id content = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
-    
-    if (!content) {
-        return nil;
-    }
+    dispatch_sync(self.fileQueue, ^{
+        
+        BRCacheManager *strongSelf = weakSelf;
+        
+        if (!strongSelf) {
+            return;
+        }
+        
+        NSString *filePath = [strongSelf getCacheFilePathForKey:key];
+        
+        BOOL fileExists = [strongSelf.fileManager fileExistsAtPath:filePath];
+        
+        if (!fileExists) {
+            return;
+        }
+        
+        NSDictionary *attributes = [strongSelf.fileManager attributesOfItemAtPath:filePath error:nil];
+        NSDate *modificationDate = attributes[NSFileModificationDate];
+        
+        NSDate *today = [NSDate date];
+        
+        if ([today timeIntervalSinceDate:modificationDate] > expireTime) {
+            return;
+        }
+        
+        content = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
+        
+        if (!content) {
+            return;
+        }
+        
+    });
     
     return content;
 }
 
-+ (void)saveCachedContent:(id)content forKey:(NSString *)key
-{ 
-    NSString *cacheDirPath = [self getCachePath];
+- (void)saveCachedContent:(id)content forKey:(NSString *)key
+{
+    __weak BRCacheManager *weakSelf = self;
     
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    
-    if (![fileManager fileExistsAtPath:cacheDirPath]) {
-        [fileManager createDirectoryAtPath:cacheDirPath
-               withIntermediateDirectories:NO
-                                attributes:nil
-                                     error:nil];
-    }
-    
-    NSString *filePath = [self getCacheFilePathForKey:key];
-    [NSKeyedArchiver archiveRootObject:content toFile:filePath];
+    dispatch_async(self.fileQueue, ^{
+        
+        BRCacheManager *strongSelf = weakSelf;
+        
+        if (!strongSelf) {
+            return;
+        }
+        
+        if (![strongSelf.fileManager fileExistsAtPath:strongSelf.diskCachePath]) {
+            [strongSelf.fileManager createDirectoryAtPath:strongSelf.diskCachePath
+                              withIntermediateDirectories:NO
+                                               attributes:nil
+                                                    error:nil];
+        }
+        
+        NSString *filePath = [strongSelf getCacheFilePathForKey:key];
+        [NSKeyedArchiver archiveRootObject:content toFile:filePath];
+        
+    });
 }
 
-+ (void)removeCachedContentForKey:(NSString *)key
+- (void)removeCachedContentForKey:(NSString *)key
 {
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *filePath = [self getCacheFilePathForKey:key];
+    __weak BRCacheManager *weakSelf = self;
     
-    [fileManager removeItemAtPath:filePath error:nil];
+    dispatch_async(self.fileQueue, ^{
+        
+        BRCacheManager *strongSelf = weakSelf;
+        
+        if (!strongSelf) {
+            return;
+        }
+        
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        NSString *filePath = [strongSelf getCacheFilePathForKey:key];
+        
+        [fileManager removeItemAtPath:filePath error:nil];
+        
+    });
 }
 
 /**

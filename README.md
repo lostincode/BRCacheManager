@@ -25,7 +25,7 @@ Example of workflow with AFNetworking.
     NSString *path = @"myendpoint";
     
     //check if we have content in the cache with a max age of 5 minutes
-    id contents = [BRCacheManager getCachedContentForKey:path withExpireTimeInSeconds:(60 * 5)];
+    id contents = [[BRCacheManager sharedManager] getCachedContentForKey:path withExpireTimeInSeconds:(60 * 5)];
 
     if (contents) {
         return completionHandler(contents, nil);
@@ -39,7 +39,7 @@ Example of workflow with AFNetworking.
          MyModel *myModel = [self customModelFromJson:responseObject];
          
          //save your content to disk
-         [BRCacheManager saveCachedContent:[myModel copy] forKey:path];
+         [[BRCacheManager sharedManager] saveCachedContent:[myModel copy] forKey:path];
          
          return completionHandler(myModel, nil);
          
