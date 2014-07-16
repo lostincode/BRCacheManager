@@ -160,7 +160,7 @@
  * Credit: http://stackoverflow.com/a/3104362
  */
 
-+ (NSString *)md5HexDigest:(NSString *)input
+- (NSString *)md5HexDigest:(NSString *)input
 {
     const char* str = [input UTF8String];
     unsigned char result[CC_MD5_DIGEST_LENGTH];
@@ -175,7 +175,7 @@
     return ret;
 }
 
-+ (void)clearCaches
+- (void)clearCaches
 {
     NSString *file;
     NSString *path = [self getCachePath];
