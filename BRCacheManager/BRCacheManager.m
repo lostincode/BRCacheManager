@@ -213,6 +213,10 @@ static const NSInteger kDefaultExpiredCacheAge = 60 * 60 * 24 * 7; // 1 week
         
         [strongSelf cleanUpDisk];
         
+        if (completionBlock) {
+            completionBlock();
+        }
+        
     });
 }
 
